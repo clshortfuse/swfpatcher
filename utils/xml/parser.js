@@ -1269,8 +1269,11 @@ export function createXMLProxy(parsedXML) {
 
       if (property === Symbol.iterator) {
         return function* generator() {
-          for (const child of arrayProxy) {
-            yield child;
+          for (const tuple of tuples) {
+            const [[firstChar]] = tuple;
+            if (firstChar === '!' || firstChar === '?' || firstChar === '$') continue;
+            // Only yield child nodes
+            yield getProxyForTuple(tuple);
           }
         };
       }
