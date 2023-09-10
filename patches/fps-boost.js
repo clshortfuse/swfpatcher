@@ -8,6 +8,7 @@ const DISABLED = true;
 export function run({ raw, xml, filename, mods }) {
   const { swf } = xml;
 
+  if (DISABLED) return false;
   const { frameRate } = swf.$attributes;
   const nFrameRate = Number.parseFloat(frameRate);
   if (nFrameRate === TARGET_FPS) return false;
@@ -279,7 +280,7 @@ export function run({ raw, xml, filename, mods }) {
 
   if (unsafe) {
     // Passback raw string to undo changes
-    // return raw;
+    return raw;
   }
 
   swf.$attributes.frameRate = TARGET_FPS.toFixed(1);
