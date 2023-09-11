@@ -1,1 +1,1 @@
-node .\cli\patch --docs
+node ./cli/patch.js --docs
