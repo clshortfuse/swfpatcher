@@ -23,15 +23,17 @@ export function run({ raw, mods, global }) {
         const blue = Number.parseInt(g3, 16);
         const newRGB = rec709YClamped(red / 255, green / 255, blue / 255, MAX_Y);
         if (newRGB) {
+          const reducedRed = hexString(Math.round(newRGB[0] * 255));
+          const reducedGreen = hexString(Math.round(newRGB[1] * 255));
+          const reducedBlue = hexString(Math.round(newRGB[2] * 255));
+          const newValue = ` color=&quot;#${reducedRed}${reducedGreen}${reducedBlue}&quot;`;
+          if (match === newValue) return match;
+
           if (blue === 255 && green === 255 && red === 255) {
             clampedWhite++;
           } else {
             clampedRGB++;
           }
-          const reducedRed = hexString(Math.round(newRGB[0] * 255));
-          const reducedGreen = hexString(Math.round(newRGB[1] * 255));
-          const reducedBlue = hexString(Math.round(newRGB[2] * 255));
-          const newValue = ` color=&quot;#${reducedRed}${reducedGreen}${reducedBlue}&quot;`;
           return newValue;
         }
         return match;

@@ -138,6 +138,8 @@ export function run({ raw, xml, filename, mods, global }) {
         nbits = enlargeBitCountS(nbits, blueAddTerm);
         const replacement = `<colorTransform type="CXFORMWITHALPHA" alphaAddTerm="0" alphaMultTerm="256" blueAddTerm="${blueAddTerm}" blueMultTerm="0" greenAddTerm="${greenAddTerm}" greenMultTerm="0" hasAddTerms="true" hasMultTerms="true" nbits="${nbits}" redAddTerm="${redAddTerm}" redMultTerm="0">`;
 
+        if (match === replacement) return match;
+
         replacements.set(match, replacement);
         return replacement;
         // const formatMulti = (mult) => `${Math.round(mult * 10_000) / 100}%`;
