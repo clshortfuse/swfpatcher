@@ -1,14 +1,11 @@
 import { numberAsHex, numberToU30Hex, numberToU32Hex } from '../utils/binary.js';
 
-const TARGET_FPS = 120;
-
-const DISABLED = true;
+const TARGET_FPS = 60;
 
 /** @type {import("./sample.js").SWFPatch} */
-export function run({ raw, xml, filename, mods }) {
+function injectExtraFrames({ xml }) {
   const { swf } = xml;
 
-  if (DISABLED) return false;
   const { frameRate } = swf.$attributes;
   const nFrameRate = Number.parseFloat(frameRate);
   if (nFrameRate === TARGET_FPS) return false;
@@ -41,9 +38,6 @@ export function run({ raw, xml, filename, mods }) {
       console.warn('Unrecognized multiframe item type', type);
       return false;
     }
-
-    // Handled by legal screen skip
-    if (filename === 'mainmenu.swf' && spriteId === '49') continue;
 
     const spriteName = symbolMap.get(spriteId);
 
@@ -277,13 +271,20 @@ export function run({ raw, xml, filename, mods }) {
     }
     init.body.$attributes.codeBytes = codeBytes;
   }
+  return xml;
+}
 
-  if (unsafe) {
-    // Passback raw string to undo changes
-    return raw;
-  }
+/** @type {import("./sample.js").SWFPatch} */
+export function run(options) {
+  const { swf } = options.xml;
+
+  const { frameRate } = swf.$attributes;
+  const nFrameRate = Number.parseFloat(frameRate);
+  if (nFrameRate === TARGET_FPS) return false;
+
+  // injectExtraFrames(options);
 
   swf.$attributes.frameRate = TARGET_FPS.toFixed(1);
-  mods.push(`fps: ${grandTotalExtraFrames}`);
-  return xml;
+  options.mods.push(`fps: ${TARGET_FPS}`);
+  return options.xml;
 }
