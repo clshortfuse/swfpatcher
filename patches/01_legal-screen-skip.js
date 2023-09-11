@@ -62,6 +62,10 @@ function removeLegalScreenViaXML(xml) {
         break;
       case 'FrameLabelTag':
         if (name === 'rollOn') {
+          if (currentFrame === 171) {
+            // Already in position, nothing to do;
+            return false;
+          }
           removeIndex = index;
           rollOnMarker = entry;
         }
@@ -81,8 +85,11 @@ function removeLegalScreenViaXML(xml) {
 }
 
 /** @type {import("./sample.js").SWFPatch} */
-export function run({ filename, xml }) {
+export function run({ filename, xml, mods }) {
   if (filename !== 'mainmenu.swf') return false;
 
-  return removeLegalScreenViaXML(xml);
+  const result = removeLegalScreenViaXML(xml);
+  if (!result) return false;
+  mods.push('legal-skip: 1');
+  return result;
 }
