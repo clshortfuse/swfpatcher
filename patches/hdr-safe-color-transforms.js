@@ -128,9 +128,9 @@ export function run({ raw, xml, filename, mods, global }) {
         }
 
         countClamped++;
-        redAddTerm = Math.round((newRGB[0] * 255));
-        greenAddTerm = Math.round((newRGB[1] * 255));
-        blueAddTerm = Math.round((newRGB[2] * 255));
+        redAddTerm = Math.floor((newRGB[0] * 255));
+        greenAddTerm = Math.floor((newRGB[1] * 255));
+        blueAddTerm = Math.floor((newRGB[2] * 255));
         nbits = 1;
         nbits = enlargeBitCountS(nbits, 256); // Alpha
         nbits = enlargeBitCountS(nbits, redAddTerm);
@@ -142,7 +142,7 @@ export function run({ raw, xml, filename, mods, global }) {
 
         replacements.set(match, replacement);
         return replacement;
-        // const formatMulti = (mult) => `${Math.round(mult * 10_000) / 100}%`;
+        // const formatMulti = (mult) => `${Math.floor(mult * 10_000) / 100}%`;
         // console.log(
         //   filename,
         //   `[ ${[alphaMultplier, redMultiplier, greenMultiplier, blueMultiplier].map(formatMulti).join(' ')} ]`,

@@ -238,5 +238,8 @@ export function rec709YClamped(red, green, blue, yMax) {
   const newGreen = Math.max(0, Math.min(sRGBFromLinearRGB(newLinGreen), 1));
   const newBlue = Math.max(0, Math.min(sRGBFromLinearRGB(newLinBlue), 1));
 
+  if (newRed === red && newGreen === green && newBlue === blue) {
+    return null;
+  }
   return [newRed, newGreen, newBlue];
 }

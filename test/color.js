@@ -6,4 +6,4 @@ let blue = 210;
 
 const result = rec709YClamped(red / 255, green / 255, blue / 255, 0.5);
 
-console.log(result.map((n) => Math.round(n * 255)));
+console.log(result.map((n) => Math.floor(n * 255)));

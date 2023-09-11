@@ -15,9 +15,9 @@ export function run({ raw, mods, global }) {
         const red = Number.parseInt(g3, 10);
         const newRGB = rec709YClamped(red / 255, green / 255, blue / 255, MAX_Y);
         if (newRGB) {
-          const reducedRed = Math.round(newRGB[0] * 255);
-          const reducedGreen = Math.round(newRGB[1] * 255);
-          const reducedBlue = Math.round(newRGB[2] * 255);
+          const reducedRed = Math.floor(newRGB[0] * 255);
+          const reducedGreen = Math.floor(newRGB[1] * 255);
+          const reducedBlue = Math.floor(newRGB[2] * 255);
 
           const newValue = ` blue="${reducedBlue}" green="${reducedGreen}" red="${reducedRed}"`;
           if (match === newValue) return match;

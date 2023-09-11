@@ -60,17 +60,27 @@ function processDefineBitsLosslessTag(tag) {
     let offset = index * bitsPerPixel;
     // R8 G8 B8
     const alpha = bitsPerPixel === 4 ? inflated[offset++] / 255 : 1;
-    const red = (inflated[offset] / 255) * alpha;
-    const green = (inflated[offset + 1] / 255) * alpha;
-    const blue = (inflated[offset + 2] / 255) * alpha;
+    const red = inflated[offset];
+    const green = inflated[offset + 1];
+    const blue = inflated[offset + 2];
 
-    const newRGB = rec709YClamped(red, green, blue, MAX_Y);
+    const newRGB = rec709YClamped(
+      (red / 255) * alpha,
+      (green / 255) * alpha,
+      (blue / 255) * alpha,
+      MAX_Y,
+    );
 
     // const y8 = y * 255;
     if (newRGB) {
-      inflated[offset] = Math.round((newRGB[0] * 255) / alpha);
-      inflated[offset + 1] = Math.round((newRGB[1] * 255) / alpha);
-      inflated[offset + 2] = Math.round((newRGB[2] * 255) / alpha);
+      const newRed = Math.floor((newRGB[0] * 255) / alpha);
+      const newGreen = Math.floor((newRGB[1] * 255) / alpha);
+      const newBlue = Math.floor((newRGB[2] * 255) / alpha);
+      if (newRed === red && newGreen === green && newBlue === blue) continue;
+      inflated[offset] = newRed;
+      inflated[offset + 1] = newGreen;
+      inflated[offset + 2] = newBlue;
+
       pixelsChanged++;
     }
     /* eslint-enable no-bitwise */
