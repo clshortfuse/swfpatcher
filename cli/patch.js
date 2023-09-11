@@ -51,6 +51,7 @@ async function collectPatches() {
   return new Map(entries.sort(([fileA], [fileB]) => fileA.localeCompare(fileB)));
 }
 
+let modsApplied = 0;
 await Promise.all(getFilenamesFromPath().map(async (filename) => {
   // Do sync to keep balanced unpack => repack flow.
   // Queueing all unpacking at once will keep unpacked contents in memory
@@ -75,7 +76,12 @@ await Promise.all(getFilenamesFromPath().map(async (filename) => {
   if (writeXML) {
     await fs.promises.writeFile(`${resolvedOutputPath}.xml`, raw);
   }
-  console.log('Modded', filename, `(${mods.join(', ')})`);
+  if (mods.length) {
+    console.log('Modded', filename, `(${mods.join(', ')})`);
+    modsApplied++;
+  } else {
+    console.log('Skipped', filename);
+  }
 }));
 
-console.log(global);
+console.log(modsApplied, `file${modsApplied === 1 ? '' : 's'} written.`);
