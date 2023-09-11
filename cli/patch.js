@@ -11,13 +11,26 @@ import { waitForTask } from '../utils/tasks.js';
 const searchParams = getSearchParams();
 
 // eslint-disable-next-line prefer-const
-const inputPath = searchParams.get('in');
-const outputPath = searchParams.get('out');
+let inputPath = searchParams.get('in');
+let outputPath = searchParams.get('out');
+const docs = searchParams.has('docs');
 let patchesPath = searchParams.get('patches');
 const writeXML = searchParams.has('xml');
 
+if (docs) {
+  inputPath = path.join(process.env.USERPROFILE, 'Documents\\My Games\\Starfield\\Data\\Interface');
+  outputPath = inputPath;
+}
+
 if (!inputPath || !outputPath) {
-  stderr.end('patch --in=INPUTPATH --out=OUTPUTPATH [--patches=patchPath] [--xml]');
+  stderr.write('patch --in=INPUTPATH --out=OUTPUTPATH [--patches=patchPath] [--xml] [--docs]\n');
+  stderr.write('\n');
+  stderr.write('--in: Input file or directory\n');
+  stderr.write('--out: Output file or directory\n');
+  stderr.write('--patches: Patch directory. Defaults to `./patches`\n');
+  stderr.write('--xml: Write XML file to output path\n');
+  stderr.write('--docs: Targets "USERPROFILEDocuments\\My Games\\Starfield\\Data\\Interface" as both --in and --out\n');
+  stderr.end();
   // eslint-disable-next-line unicorn/no-process-exit
   process.exit(1);
 }
@@ -77,10 +90,10 @@ await Promise.all(getFilenamesFromPath().map(async (filename) => {
     await fs.promises.writeFile(`${resolvedOutputPath}.xml`, raw);
   }
   if (mods.length) {
-    console.log('Modded', filename, `(${mods.join(', ')})`);
+    console.log('Modded:', filename, `(${mods.join(', ')})`);
     modsApplied++;
   } else {
-    console.log('Skipped', filename);
+    console.log('Unchanged:', filename);
   }
 }));
 
