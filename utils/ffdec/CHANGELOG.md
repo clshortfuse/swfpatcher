@@ -4,9 +4,31 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - [#1449] Updated Turkish translation
+- [#2070] SWF to XML format has new meta fields describing XML export major/minor version
+(major = uncompatible change)
+- [#2070] forceWriteAsLong Tag internal attribute is now visible and editable
+ (including XML export), allows decide whether to write length in tag header as long
 
 ### Fixed
 - [#2043] StartSound2 tag handling
+- PR176 - slow loading of allowed charsets - now lazy loaded
+- PR178 - infinite recursion when getter/setter calls same property of superclass
+- [#2070] Handling newlines and tabs in string values inside SWF to XML export
+- [#2017], PR179 Classes in same package displayed as fully qualified
+- PR177 AS3 direct editation - Vector literal
+- [#2052], [#2058] Adding new script placing class to incorrect DoABC tag
+- [#2072] AS3 direct editation - incorrectly using trait names of top level classes
+- [#2029] Simplify expressions stripping getlex and also ignoring some types of expressions
+- [#2052] Detection of switches based on notequal operator
+- [#2073] Recalculating frameCount field in SWF header and DefineSprite after deleting frame
+- Handling currently selected tags when using folder preview selection (Not working Replace button, etc.)
+- FLA export - Sprites which do not end with ShowFrame tag
+
+### Changed
+- [#2070] String values inside SWF to XML export are backslash escaped 
+to properly handle newlines and tabs. Older versions of FFDec can read this
+new format wrong and corrupt SWFs.
+Major version of SWF to XML export changed to 2.
 
 ## [18.5.0] - 2023-06-25
 ### Added
@@ -37,7 +59,7 @@ All notable changes to this project will be documented in this file.
 ## [18.4.0] - 2023-03-19
 ### Added
 - AS3 support for logical AND/OR compound operator
-- AS3 Display missing namespaces along traits as ????namespace("url")
+- AS3 Display missing namespaces along traits as §§namespace("url")
 - [#1888], [#1892] AS3 option to select SWF dependencies to properly resolve namespaces, types, etc. (currently in GUI only)
 - FileAttributes tag - SWF relative Urls flag
 - AS3 P-code editing class trait
@@ -166,7 +188,7 @@ All notable changes to this project will be documented in this file.
 - [#1458] Quick find bar overlaying horizontal scrollbar
 - [#1842] AS1/2 Better handling obfuscated code, for..in
 - [#1842] AS1/2 use parenthesis when initObject has nonstring keys
-- [#1842] AS - Do not display ????dup when the value has no sideeffect
+- [#1842] AS - Do not display §§dup when the value has no sideeffect
 - Deobfuscation icon on script toolbar did not match the deobfuscation status
 - [#1938] AS3 Direct editation - implied this instead of findprop
 - [#1938] AS3 Direct editation - local registers coerce/convert
@@ -457,7 +479,7 @@ All notable changes to this project will be documented in this file.
 
 ## [16.3.1] - 2022-11-14
 ### Fixed
-- [#1867] AS3 - ????hasnext, ????nextvalue, ????nextname in some nonstandard compiled SWFs
+- [#1867] AS3 - §§hasnext, §§nextvalue, §§nextname in some nonstandard compiled SWFs
 - [#1868] Raw editation NullPointerException
 
 ## [16.3.0] - 2022-11-14
@@ -855,7 +877,7 @@ All notable changes to this project will be documented in this file.
 - Rename invalid identifiers renames identifiers with a dollar sign
 - [#1676] Messages on movie tags when Flash Player ActiveX not available
 - [#1677] DefineFont2/3 - missing codeTableOffset if numGlyphs is zero and font has layout
-- AS decompilation - ????push before loop
+- AS decompilation - §§push before loop
 - [#1678] Removing AS3 class does not correctly clear cache
 
 ### Removed
@@ -1113,7 +1135,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Using new FFDec icon on Mac
 - AS3: get/set slot for global scope
-- AS3: Incorrect handling of strict equals operator in if vs switch resulting in ????pop
+- AS3: Incorrect handling of strict equals operator in if vs switch resulting in §§pop
 - Better goto detection/for continue
 - Support for comma operator in switch case statements
 - Losing script tree focus on script selection (disallowed walking tree with keyboard up/down)
@@ -1124,7 +1146,7 @@ All notable changes to this project will be documented in this file.
 - AS3 docs not correctly displayed under p-code when metadata present
 - Improper initialization of ActiveX component when Flash not available causing FFDec not start
 - [#1206] Switch with multiple default clauses
-- ASC2 ????push of function calls before returning from a method
+- ASC2 §§push of function calls before returning from a method
 - Support for ASC2 and swftools try..catch..finally block
 - Dot parent operator not detected in some cases
 - Namespaces handling
@@ -1177,8 +1199,8 @@ All notable changes to this project will be documented in this file.
 - Increased scrolling speed in folder preview
 - Changed /bin/bash to /usr/bin/env bash
 - Building does not require Naashorn - uses Beanshell instead
-- Use object.????slot[index] syntax instead of /* UnknownSlot */ comment when slot cannot be determined (AS3)
-- Show ????findproperty when neccessary (AS3)
+- Use object.§§slot[index] syntax instead of /* UnknownSlot */ comment when slot cannot be determined (AS3)
+- Show §§findproperty when neccessary (AS3)
 
 ### Fixed
 - Scaling - Distorted images/canvas on Hi-dpi monitors for Java 9 and later
@@ -1213,7 +1235,7 @@ All notable changes to this project will be documented in this file.
 
 ## [11.2.0] - 2018-09-08
 ### Added
-- Warning panel on scripts containing ???? instructions (Tip for Settings/Automatic deobfuscation)
+- Warning panel on scripts containing §§ instructions (Tip for Settings/Automatic deobfuscation)
 - Export AS1/2 P-code as GraphViz
 - Display better Graph using GraphViz (Must be configured in Advanced settings / Path)
 - Copy AS1/2 Graph source (GraphViz) to clipboard - rightclick menu on graph
@@ -1222,8 +1244,8 @@ All notable changes to this project will be documented in this file.
 - AS1/2 deobfuscation of empty stack pops
 
 ### Changed
-- AS1/2 Better unresolved constant handling - ????constant(xx) func instead of ????constantxx
-- AS1/2 Using eval, set functions on obfuscated names instead of ???? syntax
+- AS1/2 Better unresolved constant handling - §§constant(xx) func instead of §§constantxx
+- AS1/2 Using eval, set functions on obfuscated names instead of §§ syntax
 - Default limit of maximum executed instructions during AS1/2 deobfuscation raised to 10000
 
 ### Fixed
@@ -1232,7 +1254,7 @@ All notable changes to this project will be documented in this file.
 - AS1/2 Using temporary registers after for..in (causing incorrect chained assignments handling, etc.)
 - AS1/2 getProperty, setProperty handling
 - AS1/2 callmethod action arguments
-- Fixed ????push after continue - should be before (usually on obfuscated code)
+- Fixed §§push after continue - should be before (usually on obfuscated code)
 - AS1/2 Delete operator with nonIdentifier parameters (e.g. spaces or obfuscated)
 - DefineBits (with JPEGTables) tag export
 - No disabling autoOpenLoadedSWFs checkbox when ActiveX player not available (User can use Run button)
@@ -1242,7 +1264,7 @@ All notable changes to this project will be documented in this file.
 
 ## [11.1.0] - 2018-05-24
 ### Added
-- [#1449] Turkish translation by Osman ??Z
+- [#1449] Turkish translation by Osman ÖZ
 - AS2 classes: maintain order of variables, and methods (place variables before methods)
 - AS1/2: displaying script path in the error log when jump to invalid address
 - AS1/2: Try..catch with Error types - decompilation and direct editation
@@ -1419,7 +1441,7 @@ All notable changes to this project will be documented in this file.
 - Simplify expression setting
 - [#1118] Loading characters through ImportAssets - show as readonly
 - [#409], [#1132], [SkinPart] metadata support - decompilation and direct editation in AS3
-- [#1134] compiling ???? instructions back while direct editation (????goto is still missing)
+- [#1134] compiling §§ instructions back while direct editation (§§goto is still missing)
 - [#1121] Ability to save binary data by its name
 - [#1052] Add object to existing frame
 - Allow adding tag to main timeline
@@ -1591,7 +1613,7 @@ All notable changes to this project will be documented in this file.
 
 ## [6.0.1] - 2015-07-06
 ### Added
-- Special ???? instructions marked as red
+- Special §§ instructions marked as red
 - [#949] Replace alpha channel from commandline
 - AS3 deobfuscation from commandline
 - Option to ignore FlashCC/Alchemy packages
@@ -1606,7 +1628,7 @@ All notable changes to this project will be documented in this file.
 ## [6.0.0] - 2015-07-04
 ### Added
 - New AS3 deobfuscation method
-- Internal "preprocessor" ???? actions introduced - ????pop,????push,...
+- Internal "preprocessor" §§ actions introduced - §§pop,§§push,...
 - Allow reload FFDec when no SWF is opened
 - [#858] Allow to set compression type in header
 - [#905] Show codec details for sound items
@@ -1799,7 +1821,7 @@ All notable changes to this project will be documented in this file.
 - [#749] Internal viewer Sprite fill color
 - [#752] Sound is not stopped
 - [#753] Reload swf
-- [#759] Decompilation ?? symbol
+- [#759] Decompilation § symbol
 - [#766] Can't extract all resources
 - [#768] Super calls not being correctly recognized
 - [#773] Scripts associated with ClipActions are not shown
@@ -1919,7 +1941,7 @@ All notable changes to this project will be documented in this file.
 ## [3.0.0] - 2014-09-20
 ### Added
 - Separated GUI (GPL) and library (now LGPL)
-- Editing obfuscated identifiers via new paragraph(??) syntax
+- Editing obfuscated identifiers via new paragraph(§) syntax
 - Timeline View with preview and object hilighting
 - Show GFX data in dump view
 - [#650] New parameter to replace binarydata, images, sounds, scripts from commandline
@@ -3045,6 +3067,13 @@ All notable changes to this project will be documented in this file.
 [alpha 8]: https://github.com/jindrapetrik/jpexs-decompiler/compare/alpha7...alpha8
 [alpha 7]: https://github.com/jindrapetrik/jpexs-decompiler/releases/tag/alpha7
 [#1449]: https://www.free-decompiler.com/flash/issues/1449
+[#2070]: https://www.free-decompiler.com/flash/issues/2070
+[#2017]: https://www.free-decompiler.com/flash/issues/2017
+[#2052]: https://www.free-decompiler.com/flash/issues/2052
+[#2058]: https://www.free-decompiler.com/flash/issues/2058
+[#2072]: https://www.free-decompiler.com/flash/issues/2072
+[#2029]: https://www.free-decompiler.com/flash/issues/2029
+[#2073]: https://www.free-decompiler.com/flash/issues/2073
 [#2043]: https://www.free-decompiler.com/flash/issues/2043
 [#1998]: https://www.free-decompiler.com/flash/issues/1998
 [#2038]: https://www.free-decompiler.com/flash/issues/2038
