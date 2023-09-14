@@ -26,6 +26,13 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsdoc": "^46.4.0",
     "eslint-plugin-sort-class-members": "^1.15.2",
-    "eslint-plugin-unicorn": "^48.0.0"
+    "eslint-plugin-unicorn": "^48.0.0",
+    "swf-types": "^0.14.0"
+  },
+  "dependencies": {
+    "@gizeta/swf-reader": "^1.0.0",
+    "pako": "^2.1.0",
+    "swf-emitter": "^0.14.0",
+    "swf-parser": "^0.14.1"
   }
 }

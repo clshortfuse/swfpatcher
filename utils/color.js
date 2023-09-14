@@ -57,9 +57,9 @@ export function lumaFromSRGB8(red, green, blue) {
  * @param {number} blue
  * @param {number} yMax
  */
-export function linearRGBWithYClamp(red, green, blue, yMax) {
+export function linearRGBYClamped(red, green, blue, yMax) {
   const y = yFromLinearRGB(red, green, blue);
-  if (y <= yMax) return [red, green, blue];
+  if (y <= yMax) return null;
   const delta = yMax / y;
   return [red * delta, green * delta, blue * delta];
 }

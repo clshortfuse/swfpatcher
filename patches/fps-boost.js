@@ -1,4 +1,6 @@
-import { numberAsHex, numberToU30Hex, numberToU32Hex } from '../utils/binary.js';
+import { Ufixed8P8 } from 'swf-types';
+
+import { hexFromNumber, u30HexFromNumber, u32HexFromNumber } from '../utils/binary.js';
 
 const TARGET_FPS = 60;
 
@@ -218,7 +220,7 @@ function injectExtraFrames({ xml }) {
     /** @type {string} */
     let codeBytes = init.codeBytes;
     // console.log(filename, 'check for addFrameScript');
-    const addFrameScriptPCode = `5d${numberToU32Hex(addFrameScriptIndex)}`;
+    const addFrameScriptPCode = `5d${u32HexFromNumber(addFrameScriptIndex)}`;
     const indexOfPCode = codeBytes.indexOf(addFrameScriptPCode);
     if (indexOfPCode === -1) {
       console.warn(filename, 'pcode not in file', name);
@@ -237,8 +239,8 @@ function injectExtraFrames({ xml }) {
         if (remapping.has(frameNumber)) {
           const newFrameNumber = remapping.get(frameNumber);
           codeBytes = (newFrameNumber >= 0b1000_0000)
-            ? `${codeBytes.slice(0, i - 2)}25${numberToU30Hex(newFrameNumber)}${codeBytes.slice(i + 2)}`
-            : codeBytes.slice(0, i) + numberAsHex(newFrameNumber) + codeBytes.slice(i + 2);
+            ? `${codeBytes.slice(0, i - 2)}25${u30HexFromNumber(newFrameNumber)}${codeBytes.slice(i + 2)}`
+            : codeBytes.slice(0, i) + hexFromNumber(newFrameNumber) + codeBytes.slice(i + 2);
           // console.log(filename, 'remapped', frameNumber, '=>', newFrameNumber);
         } else {
           // console.log(filename, 'ignoring', frameNumber);
@@ -250,7 +252,7 @@ function injectExtraFrames({ xml }) {
         const frameNumber = Number.parseInt(codeBytes.slice(i, i + 2), 16);
         if (remapping.has(frameNumber)) {
           const newFrameNumber = remapping.get(frameNumber);
-          codeBytes = `${codeBytes.slice(0, i)}${numberToU30Hex(newFrameNumber)}${codeBytes.slice(i + 4)}`;
+          codeBytes = `${codeBytes.slice(0, i)}${u30HexFromNumber(newFrameNumber)}${codeBytes.slice(i + 4)}`;
           // console.log(filename, 'remapped', frameNumber, '=>', newFrameNumber);
         } else {
           // console.log(filename, 'ignoring', frameNumber);
@@ -264,6 +266,7 @@ function injectExtraFrames({ xml }) {
         do {
           i += 2;
           number = Number.parseInt(codeBytes.slice(i, i + 2), 16);
+        // eslint-disable-next-line no-bitwise
         } while ((number & 0b1000_0000) !== 0);
         continue;
       }
@@ -275,16 +278,11 @@ function injectExtraFrames({ xml }) {
 }
 
 /** @type {import("./sample.js").SWFPatch} */
-export function run(options) {
-  const { swf } = options.xml;
+export function run({ swf, mods }) {
+  if (swf.header.frameRate.valueOf() === TARGET_FPS) return false;
 
-  const { frameRate } = swf.$attributes;
-  const nFrameRate = Number.parseFloat(frameRate);
-  if (nFrameRate === TARGET_FPS) return false;
+  swf.header.frameRate = Ufixed8P8.fromValue(TARGET_FPS);
 
-  // injectExtraFrames(options);
-
-  swf.$attributes.frameRate = TARGET_FPS.toFixed(1);
-  options.mods.push(`fps: ${TARGET_FPS}`);
-  return options.xml;
+  mods.push(`fps: ${TARGET_FPS}`);
+  return true;
 }

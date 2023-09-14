@@ -1,4 +1,4 @@
-const TASK_LIMIT = 4;
+const TASK_LIMIT = 1;
 
 let currentTaskCount = 0;
 

@@ -15,7 +15,6 @@ let inputPath = searchParams.get('in');
 let outputPath = searchParams.get('out');
 const docs = searchParams.has('docs');
 let patchesPath = searchParams.get('patches');
-const writeXML = searchParams.has('xml');
 
 if (docs) {
   inputPath = path.join(process.env.USERPROFILE, 'Documents\\My Games\\Starfield\\Data\\Interface');
@@ -23,12 +22,11 @@ if (docs) {
 }
 
 if (!inputPath || !outputPath) {
-  stderr.write('patch --in=INPUTPATH --out=OUTPUTPATH [--patches=patchPath] [--xml] [--docs]\n');
+  stderr.write('patch --in=INPUTPATH --out=OUTPUTPATH [--patches=patchPath] [--docs]\n');
   stderr.write('\n');
   stderr.write('--in: Input file or directory\n');
   stderr.write('--out: Output file or directory\n');
   stderr.write('--patches: Patch directory. Defaults to `./patches`\n');
-  stderr.write('--xml: Write XML file to output path\n');
   stderr.write('--docs: Targets "USERPROFILEDocuments\\My Games\\Starfield\\Data\\Interface" as both --in and --out\n');
   stderr.end();
   // eslint-disable-next-line unicorn/no-process-exit
@@ -69,7 +67,7 @@ await Promise.all(getFilenamesFromPath().map(async (filename) => {
   // Do sync to keep balanced unpack => repack flow.
   // Queueing all unpacking at once will keep unpacked contents in memory
   const basename = path.basename(filename);
-  if (!basename.endsWith('.swf') && !basename.endsWith('.gfx')) return;
+  if (!basename.endsWith('.swf')) return;
   if (basename.startsWith('fonts')) return;
 
   // eslint-disable-next-line no-await-in-loop
@@ -86,9 +84,6 @@ await Promise.all(getFilenamesFromPath().map(async (filename) => {
       await collectPatches(),
     ),
   );
-  if (writeXML) {
-    await fs.promises.writeFile(`${resolvedOutputPath}.xml`, raw);
-  }
   if (mods.length) {
     console.log('Modded:', filename, `(${mods.join(', ')})`);
     modsApplied++;

@@ -1,65 +1,34 @@
-import { Buffer } from 'node:buffer';
-import { deflateSync, inflateSync } from 'node:zlib';
+import { deflate } from 'pako/lib/deflate.js';
+import { inflate } from 'pako/lib/inflate.js';
+import { TagType } from 'swf-types';
 
 import { rec709YClamped } from '../utils/color.js';
 
 const MAX_Y = 0.5;
 
 /**
- * @callback TagProcessor
- * @param {import('../utils/xml/parser.js').XMLProxy<never, 'zlibBitmapData' | 'bitmapFormat' | 'bitmapHeight' | 'bitmapWidth' | 'bitmapColorTableSize'} tag
- * @return {void|boolean}
+ * @param {import('swf-types/tags').DefineBitmap} tag
+ * @return {number}
  */
-
-/** @type {TagProcessor} */
-function processDefineBitsJPEG2Tag(tag) {
-  console.warn('(!) DefineBitsJPEG2Tag not supported.');
-}
-
-/** @type {TagProcessor} */
-function processDefineBitsJPEG3Tag(tag) {
-  console.warn('(!) DefineBitsJPEG3Tag not supported.');
-}
-
-/** @type {TagProcessor} */
-function processDefineBitsJPEG4Tag(tag) {
-  console.warn('(!) DefineBitsJPEG4Tag not supported.');
-}
-
-/** @type {TagProcessor} */
-function processDefineBits(tag) {
-  console.warn('(!) DefineBits not supported.');
-}
-
-/** @type {TagProcessor} */
-function processDefineBitsLosslessTag(tag) {
-  const { zlibBitmapData, bitmapFormat, bitmapHeight, bitmapWidth, bitmapColorTableSize } = tag.$attributes;
-
+function processBitmap(tag) {
   // Don't trust JPEXS the bitmapFormat
   // Compute manually based on width, height and filelength
 
-  if (bitmapFormat !== '5') {
-    console.warn('(!) BitmapFormat not supported', bitmapFormat);
-    return false;
+  if (tag.mediaType !== 'image/x-swf-lossless1' && tag.mediaType !== 'image/x-swf-lossless2') {
+    console.warn('(!) mediaType not supported', tag.mediaType);
+    return 0;
   }
-  if (bitmapColorTableSize !== '0') {
-    console.warn('(!) Bitmap color table not supported', bitmapFormat);
-    return false;
-  }
-
-  // Assume no color table;
-  const zlibBuffer = Buffer.from(zlibBitmapData, 'hex');
 
   let pixelsChanged = 0;
-  const inflated = inflateSync(zlibBuffer);
 
-  const pixelCount = Number.parseInt(bitmapHeight, 10) * Number.parseInt(bitmapWidth, 10);
-  const bitsPerPixel = inflated.length / pixelCount;
+  const pixelCount = tag.height * tag.width;
+  const inflated = inflate(tag.data.subarray(5));
+  const bytesPerPixel = inflated.length / pixelCount;
 
   for (let index = 0; index < pixelCount; index++) {
-    let offset = index * bitsPerPixel;
+    let offset = index * bytesPerPixel;
     // R8 G8 B8
-    const alpha = bitsPerPixel === 4 ? inflated[offset++] / 255 : 1;
+    const alpha = bytesPerPixel === 4 ? inflated[offset++] / 255 : 1;
     const red = inflated[offset];
     const green = inflated[offset + 1];
     const blue = inflated[offset + 2];
@@ -87,42 +56,26 @@ function processDefineBitsLosslessTag(tag) {
   }
 
   if (pixelsChanged) {
-    const deflated = deflateSync(inflated).toString('hex');
-    // Overrwrite attribute
-    tag.$attributes.zlibBitmapData = deflated;
-    return true;
+    const deflated = deflate(inflated);
+    tag.data = [
+      ...tag.data.slice(0, 5),
+      deflated,
+    ];
   }
-  return false;
-}
-
-/** @type {TagProcessor} */
-function processDefineBitsLossless2Tag(tag) {
-  return processDefineBitsLosslessTag(tag); // No difference
+  return pixelsChanged;
 }
 
 /** @type {import("./sample.js").SWFPatch} */
-export function run({ raw, xml, mods, global }) {
-  const { swf } = xml;
-
+export function run({ swf, mods, global }) {
   let modifiedCount = 0;
 
-  for (const child of swf.tags) {
-    if (child.$tag !== 'item') continue;
-    const { type } = child.$attributes;
-    let processor;
-    switch (type) {
-      case 'DefineBitsJPEG2Tag': processor = processDefineBitsJPEG2Tag; break;
-      case 'DefineBitsJPEG3Tag': processor = processDefineBitsJPEG3Tag; break;
-      case 'DefineBitsJPEG4Tag': processor = processDefineBitsJPEG4Tag; break;
-      case 'DefineBits': processor = processDefineBits; break;
-      case 'DefineBitsLosslessTag': processor = processDefineBitsLosslessTag; break;
-      case 'DefineBitsLossless2Tag': processor = processDefineBitsLossless2Tag; break;
+  for (const tag of swf.tags) {
+    switch (tag.type) {
+      // case TagType.DefineJpegTables: processor = processDefineBitsJPEG2Tag; break;
+      case TagType.DefineBitmap:
+        modifiedCount += processBitmap(tag); break;
       default:
         continue;
-    }
-    const result = processor(child);
-    if (result) {
-      modifiedCount++;
     }
   }
   if (!modifiedCount) return false;
@@ -130,5 +83,5 @@ export function run({ raw, xml, mods, global }) {
   global.bmp ??= { bitmaps: 0 };
   global.bmp.bitmaps += modifiedCount;
 
-  return xml;
+  return true;
 }

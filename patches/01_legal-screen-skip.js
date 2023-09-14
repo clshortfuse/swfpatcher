@@ -1,67 +1,31 @@
-/**
- * @param {string} raw
- * @return {string|boolean}
- */
-function removeLegalScreenViaRaw(raw) {
-  const spriteIndex = raw.indexOf('<item type="DefineSpriteTag" forceWriteAsLong="true" frameCount="175" hasEndTag="true" spriteId="49">');
-  if (spriteIndex === -1) return false;
+import { TagType } from 'swf-types';
 
-  const FRAME_MARKER = '<item type="ShowFrameTag"></item>';
-  const ROLL_ON_LABEL = '<item type="FrameLabelTag" forceWriteAsLong="true" name="rollOn" namedAnchor="false"></item>';
+/** @type {import("./sample.js").SWFPatch} */
+export function run({ filename, swf, mods }) {
+  if (filename !== 'mainmenu.swf') return false;
 
-  const rollOnLabelIndex = raw.indexOf(ROLL_ON_LABEL, spriteIndex);
-  let frameMarkerIndex = spriteIndex;
-  // Iterate until we are at end of frame 171
-  // Frames are denoted at end of options
-  for (let i = 1; i < 171; i++) {
-    frameMarkerIndex = raw.indexOf(FRAME_MARKER, frameMarkerIndex + 1);
-  }
-  if (frameMarkerIndex === -1) return false;
-  // We should have passed the roll on marker;
-  if (rollOnLabelIndex === -1) return false;
-  // Roll On Label already exists or belongs to other Sprite
-  if (rollOnLabelIndex > frameMarkerIndex) return false;
-
-  const rollOnLabelEnd = rollOnLabelIndex + ROLL_ON_LABEL.length;
-  const frameMarkerEnd = frameMarkerIndex + FRAME_MARKER.length;
-  // Insert new label after marker and remove old label
-  const replaced = raw.slice(0, rollOnLabelIndex)
-   + raw.slice(rollOnLabelEnd, frameMarkerEnd)
-   + ROLL_ON_LABEL
-   + raw.slice(frameMarkerEnd);
-
-  return replaced;
-}
-
-/**
- * @param {import("../utils/xml/parser.js").XMLProxy<any>} xml
- * @return {import("../utils/xml/parser.js").XMLProxy<any>|boolean}
- */
-function removeLegalScreenViaXML(xml) {
-  const { swf } = xml;
-
-  const sprite = swf.tags.$array
-    .find(({ $attributes: { type, spriteId } }) => (type === 'DefineSpriteTag' && spriteId === '49'));
-
+  const sprite = /** @type {import('swf-types/tags').DefineSprite} */ (swf.tags
+    .find((tag) => (tag.type === TagType.DefineSprite)
+      && (tag.id === 49)
+      && (tag.frameCount === 175)));
   if (!sprite) return false;
 
   let currentFrame = 0;
   let insertIndex = -1;
   let removeIndex = -1;
+  /** @type {import('swf-types/tags').FrameLabel} */
   let rollOnMarker;
 
-  const subTagsArray = sprite.subTags.$array;
-  for (const [index, entry] of subTagsArray.entries()) {
-    const { $attributes: { type, name } } = entry;
-    switch (type) {
-      case 'ShowFrameTag':
+  for (const [index, entry] of sprite.tags.entries()) {
+    switch (entry.type) {
+      case TagType.ShowFrame:
         currentFrame++;
         if (currentFrame === 172) {
           insertIndex = index;
         }
         break;
-      case 'FrameLabelTag':
-        if (name === 'rollOn') {
+      case TagType.FrameLabel:
+        if (entry.name === 'rollOn') {
           if (currentFrame === 171) {
             // Already in position, nothing to do;
             return false;
@@ -78,18 +42,10 @@ function removeLegalScreenViaXML(xml) {
   if (insertIndex < removeIndex) return false;
 
   // Duplicate into insert position
-  subTagsArray.splice(insertIndex, 0, rollOnMarker);
+  sprite.tags.splice(insertIndex, 0, rollOnMarker);
   // Remove from old;
-  subTagsArray.splice(removeIndex, 1);
-  return xml;
-}
+  sprite.tags.splice(removeIndex, 1);
 
-/** @type {import("./sample.js").SWFPatch} */
-export function run({ filename, xml, mods }) {
-  if (filename !== 'mainmenu.swf') return false;
-
-  const result = removeLegalScreenViaXML(xml);
-  if (!result) return false;
   mods.push('legal-skip: 1');
-  return result;
+  return true;
 }

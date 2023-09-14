@@ -1,12 +1,11 @@
 /**
  * @typedef {Object} SWFPatchOptions
- * @prop {string} raw
+ * @prop {import('swf-types').Movie} swf
  * @prop {string} inputPath
  * @prop {string} outputPath
  * @prop {string} filename
  * @prop {string[]} mods
  * @prop {Record<string, string>} global
- * @prop {import("../utils/xml/parser.js").XMLProxy<any>} xml
  */
 
 /**
